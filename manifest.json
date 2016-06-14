@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+
+  "name": "kpCal",
+  "description": "Kyle's calendar",
+  "version": "2.0",
+  "chrome_url_overrides": {
+      "newtab": "cal.html"
+  },
+  "content_security_policy":"script-src 'self' 'unsafe-eval' https://apis.google.com https://maps.googleapis.com; object-src 'self'",
+  "oauth2": {
+    "client_id": "356319519864-gcgrmgndh4t8t77mss6i7o1laa2g67vd.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar"
+    ]
+  },
+
+  "permissions": [
+      "tabs",
+      "storage",
+      "identity",
+      "https://maps.googleapis.com/*",
+      "https://apis.google.com/*",
+      "https://www.googleapis.com/*"
+   ]
+}

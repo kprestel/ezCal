@@ -1,0 +1,134 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    margin-top: 40px;
+    text-align: center;
+    font-size: 14px;
+    font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+    background: black;
+    background: linear-gradient(black, grey);
+}
+
+#wrap {
+    width: 1500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h3{
+    color: black;
+}
+
+label{
+    color: black;
+}
+
+.ui-dialog {
+    overflow: visible;
+    float: left;
+}
+
+.ui-selectmenu{
+    float: left;
+}
+
+#external-events-wrapper {
+    float: left;
+    width: 200px;
+    padding: 20px 10px;
+    border: 1px solid #ccc;
+    background: #EEEEEE;
+    text-align: left;
+}
+
+#external-events h3 {
+    font-size: 16px;
+    margin-top: 0;
+    padding-top: 1em;
+}
+
+#external-events .fc-event {
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+#B-Boy .B-Boy, .fc-event {
+    background-color: purple;
+}
+
+#MC .fc-event, .MC {
+    background-color: magenta;
+}
+
+#DJ .fc-event, .DJ {
+    background-color: limegreen;
+}
+
+#General .fc-event, .General {
+    background-color: dodgerblue;
+}
+
+#Graffiti .fc-event, .Graffiti {
+    background-color: gold;
+}
+
+#CommunityService .fc-event, .Community-Service {
+    background-color: lightslategrey;
+}
+
+#external-event-text {
+    float: left;
+    width: 75px;
+}
+
+#external-event-text {
+    margin: auto;
+    float: left;
+    width: inherit;
+}
+
+fieldset {
+    padding: 0;
+    border: 0;
+    margin-top: 25px;
+}
+
+input.text {
+    margin-bottom: 12px;
+    width: 95%;
+    padding: .4em;
+}
+
+label, input {
+    display: block;
+    text-align: left;
+}
+
+#external-events p {
+    margin: 1.5em 0;
+    font-size: 11px;
+    color: #666;
+}
+
+    #external-events p input {
+        margin: 0;
+        vertical-align: middle;
+    }
+
+#trashCan {
+    float: left;
+    width: 150px;
+    vertical-align: middle;
+    padding: inherit;
+}
+
+#calendar {
+    float: left;
+    width: 900px;
+}
+
+.ck {
+    display: inline;
+}

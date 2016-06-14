@@ -1,0 +1,1293 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"cal",
+				"calendars"
+			],
+			[
+				"acc",
+				"access_token"
+			],
+			[
+				"Au",
+				"Authorization"
+			],
+			[
+				"handle",
+				"handleAuthResult	(cal.js)"
+			],
+			[
+				"eventTy",
+				"eventTypeForm	(cal.html)"
+			],
+			[
+				"wid",
+				"width"
+			],
+			[
+				"he",
+				"height"
+			],
+			[
+				"fc",
+				"fc-event"
+			],
+			[
+				"ui-wi",
+				"ui-widget-content"
+			],
+			[
+				"fi",
+				"fieldset	<fieldset>"
+			],
+			[
+				"but",
+				"button	<button>"
+			],
+			[
+				"date",
+				"date〔argument〕"
+			],
+			[
+				"labe",
+				"label	<label>"
+			],
+			[
+				"lab",
+				"label	<label>"
+			],
+			[
+				"win",
+				"window_length	(technical.py)"
+			],
+			[
+				"US",
+				"USEquityPricing.close	(technical.py)"
+			],
+			[
+				"la",
+				"label	<label>"
+			],
+			[
+				"div",
+				"div	Tag"
+			],
+			[
+				"ali",
+				"align-content"
+			],
+			[
+				"mar",
+				"margin"
+			],
+			[
+				"inpu",
+				"inputt	input - text"
+			],
+			[
+				"di",
+				"div	Tag"
+			],
+			[
+				"dv",
+				"div	Tag"
+			],
+			[
+				"ht",
+				"html5	Simple HTML5 Boilerplate"
+			],
+			[
+				"gapi",
+				"gapi.client.setApiKey"
+			],
+			[
+				"getev",
+				"getEventList"
+			],
+			[
+				"au",
+				"authorize"
+			],
+			[
+				"func",
+				"function〔keyword〕"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "js/cal.js",
+			"settings":
+			{
+				"buffer_size": 21369,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/JSHint Gutter/JSHint.sublime-settings",
+			"settings":
+			{
+				"buffer_size": 814,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/HTML-CSS-JS Prettify/HTMLPrettify.sublime-settings",
+			"settings":
+			{
+				"buffer_size": 614,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "$(document).ready(function () {\n    // getUserGCal();\n    //loadEvents();\n    //initAutoComplete();\n    intDroppables();\n    loadEvents();\n    displayCalendar();\n});\nvar numOfEvents;\nvar eventArray = [];\nvar eventTypeArray = [];\nvar maxEventID;\nvar placeSearch, autoComplete, place;\n\nfunction displayCalendar() {\n    $('#calendar').fullCalendar({\n        header: {\n            left: 'prev,next today',\n            center: 'title',\n            right: 'month,agendaWeek,agendaDay'\n        },\n        selectable: true,\n        selectHelper: true,\n        select: function (start, end) {\n            showPopUp(start, end);\n        },\n        editable: true,\n        droppable: true,\n        unselectAuto: true,\n        draggable: true,\n        lazyFetching: false,\n        forceEventDuration: true,\n        eventTextColor: 'White',\n        events: $.map(eventArray, function (item, i) {\n            console.log(item);\n            var event = new Object();\n            event.id = item.eventID;\n            event.start = moment(item.eventStartDate);\n            event.end = moment(item.eventEndDate);\n            event.title = item.eventTitle;\n            event.description = item.eventDescription;\n            event.placeID = item.eventPlaceID;\n            event.topic = item.eventTopic;\n            event.allDay = item.eventAllDay;\n            return event;\n        }),\n        eventRender: function (event, element) {\n            element.qtip({\n                content: event.title + \"<br>\" + event.start.format('MM-DD h:mm') + \" - \" + event.end.format('MM-DD h:mm'),\n                position: {\n                    corner: {\n                        tootltip: 'bottomLeft',\n                        target: 'topRight'\n                    }\n                },\n                style: {\n                    border: {\n                        width: 1,\n                        radius: 3,\n                        color: 'green'\n                    },\n                    padding: 10,\n                    textAlign: 'left',\n                    tip: true\n                }\n            });\n            // TODO: update this\n            switch (event.topic) {\n                case 'MC':\n                    element.addClass('MC');\n                    break;\n                case 'B-Boy':\n                    element.addClass('B-Boy');\n                    break;\n                case 'DJ':\n                    element.addClass('DJ');\n                    break;\n                case 'Graffiti':\n                    element.addClass('Graffiti');\n                    break;\n                case 'General':\n                    element.addClass('General');\n                    break;\n                case 'Community Service':\n                    element.addClass('Community-Service');\n                    break;\n                default:\n                    element.addClass('General');\n                    break;\n            }\n        },\n        eventAfterRender: function (event, element, view) {\n            if ($(this).data(\"qtip\")) $(this).qtip('destroy');\n        },\n        eventResize: function (event, dayDelta, minuteDelta, revertFunc) {\n            if ($(this).data(\"qtip\")) $(this).qtip('destroy');\n            if (!confirm(\"Are you sure you want to change \" + event.title + \"'s end time to \" + event.end.format('MM-DD h:mm'))) {\n                revertFunc();\n            } else {\n                updateEvent(event);\n            }\n            if ($(this).data(\"qtip\")) $(this).qtip('destroy');\n        },\n        eventDrop: function (event, dayDelta, minuteDelta, allDay, revertFunc) {\n            if ($(this).data(\"qtip\")) $(this).qtip('destroy');\n            if (!confirm(\"Are you sure you want to change \" + event.title + \"'s date to \" + event.start.format('MM-DD h:mm') + \" - \" + event.end.format('MM-DD h:mm'))) {\n                revertFunc();\n            } else {\n                updateEvent(event);\n            }\n            if ($(this).data(\"qtip\")) $(this).qtip('destroy');\n        },\n        eventDurationEditable: true, // change an events duration by dragging!\n        disableResizing: true,\n        startEditable: true,\n        eventAfterAllRender: function (view) {},\n        drop: function (date) {\n            // called when a external event is dropped\n            eventDropped(date, this);\n            if ($(this).data(\"qtip\")) $(this).qtip('destroy');\n        },\n        eventClick: function (event) {\n            showEventClickedPopUp(event);\n        },\n        eventDestroy: function (event, element, view) {\n            element.qtip('destroy');\n        },\n        eventDragStop: function (event, jsEvent) {\n            var trash = jQuery('#trashCan');\n            var ofs = trash.offset();\n            var x1 = ofs.left;\n            var x2 = ofs.left + trash.outerWidth(true);\n            var y1 = ofs.top;\n            var y2 = ofs.top + trash.outerHeight(true);\n\n            if (jsEvent.pageX >= x1 && jsEvent.pageX <= x2 && jsEvent.pageY >= y1 && jsEvent.pageY <= y2) {\n                deleteEvent(event);\n            }\n\n            $(\"#calendar\").fullCalendar('unselect');\n        },\n        dragRevertDuration: 0\n    });\n}\n\nfunction loadEvents() {\n    if (localStorage[\"eventArray\"]) {\n        eventArray = JSON.parse(localStorage.getItem('eventArray'));\n    }\n}\n\nfunction saveEvents() {\n    localStorage.setItem('eventArray', JSON.stringify(eventArray));\n}\n\nfunction saveEventTypes() {\n    localStorage.setItem('eventTypeArray', JSON.stringify(eventTypeArray));\n}\n\nfunction displayEvents(eventArray) {}\n// saves event to eventArray\n// used for both intial save and\n// later edits to the event\nfunction updateEvent(event) {\n    var eventToSave = new Object();\n    eventToSave.eventID = event.id;\n    eventToSave.eventTitle = event.title;\n    eventToSave.eventStartDate = event.start.format('YYYY-MM-DD h:mm a');\n    eventToSave.eventEndDate = event.end.format('YYYY-MM-DD h:mm a');\n    eventToSave.eventTopic = event.topic;\n    eventToSave.eventPlaceID = event.placeID;\n    eventToSave.eventDescription = event.description;\n    eventToSave.eventAllDay = event.allDay;\n    eventArray.push(eventToSave);\n    saveEvents();\n    console.log(eventToSave);\n}\n// adds drag/drop functionality the events\nfunction intDroppables() {\n    $('#external-events .fc-event').each(function () {\n        $(this).data('event', {\n            topic: $(this).text(),\n            title: $(this).text(),\n            stick: false\n        });\n        $(this).draggable({\n            zIndex: 999,\n            revert: \"invalid\",\n            //help: \"clone\",\n            drop: function () {\n                $(\"#calendar\").fullCalendar('unselect');\n            },\n            revertDuration: 0\n        });\n    });\n\n    $(\"#btnNewEventType\").click(function () {\n        createNewEventType();\n    });\n}\n\nfunction createNewEventType() {\n    $(\"#eventTypeForm\").dialog({\n        autoOpen: false,\n        height: 200,\n        width: 200,\n        title: 'Create New Event Type',\n        modal: true,\n        buttons: {\n            \"Create\": function () {\n                var newType = new Object();\n                newType.type = $(\"#txtEventType\").val();\n                newType.color = value;\n                eventTypeArray.push(newType);\n            },\n            Cancel: function () {\n                $(\"#eventTypeForm\").dialog(\"close\");\n            }\n        },\n        close: function () {\n            $(\"#eventTypePopUpForm\")[0].reset();\n        }\n    });\n    $(\"#eventTypeForm\").dialog(\"open\");\n}\n\nfunction setEventColor(picker) {\n    console.log(picker.toString());\n    value = picker.toString();\n}\n\nfunction intExternalEvents() {\n    // not used?\n    var clonedEvent = $('#external-events .fc-event').clone();\n    var eventDescription = $('#txtExternalEventDescription').val();\n    var eventTitle = $('#txtExternalEventTitle').val();\n    $(clonedEvent).attr('data-description', eventDescription);\n    $(clonedEvent).attr('data-title', eventTitle);\n}\n// TODO: Remove events from the array\n// deletes event from the DB when it is dropped in the trashcan\nfunction deleteEvent(event) {\n    for (var i = 0; i < eventArray.length; i++) {\n        if (eventArray[i].eventID == event.id) {\n            eventArray.splice(i, 1);\n            break;\n        }\n    }\n    $('#calendar').fullCalendar('removeEvents', event.id);\n    saveEvents();\n}\n// called when an existing event's date/time is changed by being dropped on the calendar\nfunction eventDropped(date, externalEvent) {\n    var event_object;\n    var copiedEventObject;\n\n    var i = $(\"#ddlStartTime\").val().indexOf(\":\");\n    var startHour = $(\"#ddlStartTime\").val().substring(0, i);\n    startHour = parseInt(startHour, 10);\n    var startMin = $(\"#ddlStartTime\").val().substring(i + 1, i + 3);\n    startMin = parseInt(startMin, 10); // may cause display issues\n    var e = document.getElementById('startAmPm');\n    var startAmPM = e.options[e.selectedIndex].value;\n\n    var endHour = $(\"#ddlEndTime\").val().substring(0, i);\n    endHour = parseInt(endHour, 10);\n    var endMin = $(\"#ddlEndTime\").val().substring(i + 1, i + 3);\n    endMin = parseInt(endMin, 10); // may cause display issues\n    var ex = document.getElementById('endAmPm');\n    var endAmPM = ex.options[ex.selectedIndex].value;\n\n    if (startAmPM == \"pm\") {\n        startHour += 12;\n    }\n    if (endAmPM == \"pm\") {\n        endHour += 12;\n    }\n\n    var startDate = date.clone();\n    event_object = $(externalEvent).data('event');\n    event_object.description = $('#txtExternalEventDescription').val();\n    event_object.title = $('#txtExternalEventTitle').val();\n    copiedEventObject = $.extend({}, event_object);\n    copiedEventObject.start = startDate.hour(startHour).minute(startMin);\n    copiedEventObject.id = getNewID();\n    copiedEventObject.end = date.hour(endHour).minute(endMin);\n    if (document.getElementById(\"ckAllDay\").checked) {\n        copiedEventObject.allDay = true;\n    } else {\n        copiedEventObject.allDay = false;\n    }\n    if ($(\"#txtLocation\").val() > 0) {\n        copiedEventObject.placeID = place.place_id;\n    } else {\n        copiedEventObject.placeID = null;\n    }\n    copiedEventObject.topic = event_object.topic;\n    copiedEventObject.description = event_object.description;\n    console.log(copiedEventObject);\n    updateEvent(copiedEventObject);\n    $('#calendar').fullCalendar('renderEvent', copiedEventObject, true);\n    place = \"\";\n}\n// used to update an existing date in the calendar\nfunction showEventClickedPopUp(event) {\n    $(\"#eventForm\").dialog({\n        autoOpen: false,\n        height: 400,\n        width: 270,\n        title: 'Update Event',\n        modal: true,\n        buttons: {\n            \"Update Event\": function () {\n                // copy values from the clicked event to the new event\n                var copiedEvent = new Object();\n                var e = document.getElementById(\"ddlEventTopic\");\n                topic = e.options[e.selectedIndex].value;\n                copiedEvent.topic = topic;\n                copiedEvent.id = event.id;\n                copiedEvent.title = $(\"#eventForm #txtEventTitle\").val();\n                copiedEvent.start = moment(new Date($(\"#eventForm #txtEventStartDate\").val()));\n                copiedEvent.end = moment(new Date($(\"#eventForm #txtEventEndDate\").val()));\n                copiedEvent.description = $(\"#eventForm #txtEventDescription\").val();\n                copiedEvent.placeID = place.place_id;\n                updateEvent(copiedEvent);\n                $('#calendar').fullCalendar('removeEvents', event.id);\n                $('#calendar').fullCalendar('renderEvent', copiedEvent, false);\n                clearTextBoxes();\n            },\n            Cancel: function () {\n                $(\"#eventForm\").dialog('close');\n            }\n        },\n        close: function () {\n            $(\"#eventPopUpForm\")[0].reset();\n        }\n    });\n\n    $(\"#eventForm #txtEventTitle\").val();\n    $(\"#eventForm\").find(\"#btnAddEvent\").click(function (e) {\n        e.preventDefault();\n        updateEvent(event);\n    });\n    $('#ddlEventTopic').val(event.topic);\n    autoComplete = new google.maps.places.Autocomplete(document.getElementById('txtEventLocation'), {\n        types: ['geocode']\n    });\n    autoComplete.addListener('place_changed', savePlaceID);\n    $(\"#eventForm #txtEventDescription\").val(event.description);\n    $(\"#eventForm #txtEventTitle\").val(event.title);\n    $(\"#eventForm #txtEventStartDate\").val(event.start.format('YYYY-MM-DD h:mm:ss'));\n    $(\"#eventForm #txtEventEndDate\").val(event.end.format('YYYY-MM-DD h:mm:ss'));\n    $(\"#eventForm\").dialog('open');\n}\n\nfunction showDroppedEventPopUp(event) {\n    // currently not used 3/30\n    $(\"#eventForm\").dialog({\n        autoOpen: false,\n        height: 400,\n        width: 270,\n        modal: true\n    });\n    $(\"#txtEventTitle\").val(event.title);\n    $(\"txtEventStartDate\").val(event.start);\n    $(\"txtEventEndDate\").val(event.end);\n    $(\"eventForm\").dialog('open');\n}\n// called when a user clicks on an empty space on the calendar\nfunction showPopUp(start, end) {\n    $(\"#eventForm\").dialog({\n        autoOpen: false,\n        height: 400,\n        width: 250,\n        title: \"Add New Event\",\n        modal: true,\n        buttons: {\n            \"Add Event\": function () {\n                addEventFromDialog();\n                clearTextBoxes();\n            },\n            Cancel: function () {\n                $(\"#eventForm\").dialog('close');\n            }\n        },\n        close: function () {\n            $(\"#eventPopUpForm\")[0].reset();\n        }\n    });\n    autoComplete = new google.maps.places.Autocomplete(document.getElementById('txtEventLocation'), {\n        types: ['geocode']\n    });\n    autoComplete.addListener('place_changed', savePlaceID);\n\n    $(\"#eventForm #txtEventTitle\").val();\n    $(\"#eventForm\").find(\"#btnAddEvent\").click(function () {\n        addEventFromDialog();\n    });\n    $(\"#eventForm #txtEventStartDate\").val(start.format('MM-DD-YYYY h:mm'));\n    $(\"#eventForm #txtEventEndDate\").val(start.add(1, 'h').format('MM-DD-YYYY h:mm'));\n    $(\"#eventForm\").dialog('open');\n    $('#ddlEventTopic').selectmenu();\n}\n// resets the textboxes\nfunction clearTextBoxes() {\n    $(\"#eventForm #txtEventDescription\").val(\"\");\n    $(\"#eventForm #txtEventTitle\").val(\"\");\n    $(\"#eventForm #txtEventStartDate\").val(\"\");\n    $(\"#eventForm #txtEventEndDate\").val(\"\");\n    $(\"#eventForm\").dialog('close');\n}\n// get next availiable ID to assign it to the event in fullcalendar\nfunction getNewID() {\n    var max = 0;\n    for (var i = 0; i < eventArray.length; i++) {\n        var x = parseInt(eventArray[i].eventID, 10);\n        if (x > max) {\n            max = x;\n        }\n    }\n    max += 1;\n    console.log(max);\n    return max;\n}\n// called when a time is clicked for the user to add an event.\nfunction addEventFromDialog() {\n    var eventToSave = new Object();\n    var event = new Object();\n    var topic;\n    var e = document.getElementById(\"ddlEventTopic\");\n    topic = e.options[e.selectedIndex].value;\n    eventToSave.eventTitle = event.title = $('#txtEventTitle').val();\n    eventToSave.eventStartDate = event.start = moment(new Date($(\"#eventForm #txtEventStartDate\").val()));\n    eventToSave.eventEndDate = event.end = moment(new Date($(\"#eventForm #txtEventEndDate\").val()));\n    eventToSave.eventDescription = event.description = $('#txtEventDescription').val();\n    eventToSave.eventTopic = event.topic = topic;\n    $('#calendar').fullCalendar('refetchEvents');\n    $('#calendar').fullCalendar('renderEvent', event, true);\n\n    $.ajax({\n        type: \"POST\",\n        contentType: \"application/json\",\n        data: \"{eventData:\" + JSON.stringify(eventToSave) + \"}\",\n        url: \"/CalendarService.asmx/updateEvent\",\n        dataType: \"json\",\n        success: function () {\n            $(\"#eventForm\").reset();\n        },\n        error: function (XMLHttpRequest, textStatus, errorThrown) {\n            debugger;\n        }\n    });\n}\n\nfunction updateEventSource(data) {\n    // delete?\n    var events = new Array();\n    $.map(data.d, function (item, i) {\n        console.log(item);\n        var eventEndDate = new Object();\n        var event = new Object();\n        event.id = item.eventID, event.start = new Date(item.eventStartDate), event.end = new Date(item.eventEndDate), event.title = item.eventTitle, event.description = item.eventDescription, event.topic = item.eventTopic, event.allDay = false;\n        events.push(event);\n        console.log(event);\n    });\n    $('#calendar').fullCalendar('addEventSource', events);\n}\n\nfunction initAutoComplete() {\n    autoComplete = new google.maps.places.Autocomplete(document.getElementById('txtLocation'), {\n        types: ['geocode']\n    });\n    autoComplete.addListener('place_changed', savePlaceID);\n}\n\nfunction savePlaceID() {\n    place = autoComplete.getPlace();\n}\n\nfunction geoLocate() {\n    if (navigator.geolocation) {\n        navigator.geolocation.getCurrentPosition(function (position) {\n            var geoLocation = {\n                lat: position.coords.latitude,\n                lng: position.coords.longitude\n            };\n            var circle = new google.maps.Circle({\n                center: geoLocation,\n                radius: position.coords.accuracy\n            });\n            autoComplete.setBounds(circle.getBounds());\n        });\n    }\n}\n\nfunction locateUser() {\n    $(\"#txtLocation\").focus(function () {\n        geoLocate();\n    });\n}\n\nfunction getUserGCal() {\n    var apiKey = 'AIzaSyBH1B0PDg5Ck7EXnix7u9nDpFAZcGejoVE';\n    gapi.client.setApiKey(apiKey);\n    chrome.identity.getAuthToken({\n        'interactive': false\n    }, function (token) {\n        if (chrome.runtime.lastError) {\n            console.log(chrome.runtime.lastError);\n        } else {\n            gapi.auth.setToken(token);\n            console.log('test');\n            //console.log(token);\n            //gapi.client.setApiKey(apiKey);\n            loadCalApi();\n        }\n    });\n    //getEventList();\n\n    // var clientID = '356319519864-0ar5t1u4o396t6v9mdstoi156c85igne.apps.googleusercontent.com';\n    // var scopes = \"https://www.googleapis.com/auth/calendar\";\n    // gapi.client.setApiKey(apiKey);\n    // checkAuth(clientID, scopes);\n}\n\nfunction checkAuth(clientID, scopes) {\n    gapi.auth.authorize({\n        'client_id': clientID,\n        'scope': scopes,\n        'immediate': false\n    }, handleAuthResult);\n}\n\nfunction handleAuthResult(authResult) {\n    // var authorizeDiv\n    if (authResult && !authResult.error) {\n        loadCalApi();\n    } else {\n        console.log(authResult);\n    }\n}\n\nfunction loadCalApi() {\n    gapi.client.load('calendar', 'v3', getEventList);\n    //getEventList();\n    console.log('test');\n}\n\nfunction getEventList() {\n    var apiKey = 'AIzaSyBH1B0PDg5Ck7EXnix7u9nDpFAZcGejoVE';\n    $.ajax({\n        url: 'https://www.googleapis.com/calendar/v3/calendars/primary/events?key=' + apiKey,\n        // type: 'default GET (Other values: POST)',\n        dataType: 'json',\n        data: {}\n    }).done(function (response) {\n        console.log(\"success\");\n        console.log(response);\n    }).fail(function (XMLHttpRequest, textStatus, errorThrown) {\n        console.log(\"error\");\n        console.log(XMLHttpRequest);\n        console.log(textStatus);\n        console.log(errorThrown);\n    }).always(function () {\n        console.log(\"complete\");\n    });\n\n    // var request = gapi.client.calendar.events.list({\n    //     'calendarId': 'primary'\n    // });\n    // console.log(request);\n\n    // request.execute(function(response){\n    //     console.log(response);\n    //     var events = response.items;\n    //     if(events.length > 0){\n    //         for(i=0; i < events.length; i++){\n    //             var event = events[i];\n    //             var when = event.start.dateTime;\n    //             if(!when){\n    //                 when = event.start.date;\n    //             }\n    //         }\n    //         console.log(event);\n    //     } else {\n    //         console.log('no events');\n    //     }\n    // });\n}",
+			"settings":
+			{
+				"buffer_size": 19979,
+				"line_ending": "Windows",
+				"scratch": true
+			}
+		},
+		{
+			"file": "css/calendarStyleSheet.css",
+			"settings":
+			{
+				"buffer_size": 1895,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "manifest.json",
+			"settings":
+			{
+				"buffer_size": 667,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/JSHint Gutter/.jshintrc",
+			"settings":
+			{
+				"buffer_size": 815,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "cal.html",
+			"settings":
+			{
+				"buffer_size": 11494,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "css/fullcalendar.css",
+			"settings":
+			{
+				"buffer_size": 25553,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 375.0,
+		"last_filter": "insta",
+		"selected_items":
+		[
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"",
+				"About"
+			]
+		],
+		"width": 650.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/E/CodeFiles/Calendar",
+		"/E/CodeFiles/Calendar/css",
+		"/E/CodeFiles/Calendar/js"
+	],
+	"file_history":
+	[
+		"/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/JSHint Gutter/.jshintrc",
+		"/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/HTML-CSS-JS Prettify/HTMLPrettify.sublime-settings",
+		"/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/Babel/Babel.sublime-settings",
+		"/E/CodeFiles/Calendar/manifest.json",
+		"/E/CodeFiles/bluePrint/portfolio/updatePortfolio.php",
+		"/E/CodeFiles/bluePrint/pubPort/publicPortfolio.php",
+		"/E/CodeFiles/bluePrint/php/updatePortfolio.php",
+		"/E/CodeFiles/Calendar/js/adminCalPhp.js",
+		"/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/User/HTMLBeautify.sublime-settings",
+		"/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/HTMLBeautify/HTMLBeautify.sublime-settings",
+		"/C/Anaconda3/envs/python34env/Lib/site-packages/zipline/examples/momentum_pipeline.py",
+		"/E/CodeFiles/algos/sma1Ex.py",
+		"/C/Anaconda3/envs/python34env/Lib/site-packages/zipline/pipeline/factors/technical.py",
+		"/E/CodeFiles/algos/examples/dual_moving_average.py",
+		"/E/CodeFiles/algos/sma1.py",
+		"/C/Anaconda3/envs/python34env/Lib/site-packages/zipline/__init__.py",
+		"/E/CodeFiles/Calendar/cal.html",
+		"/E/CodeFiles/Calendar/css/calendarStyleSheet.css",
+		"/E/CodeFiles/DashExtension/css/dashStyle.css",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/Hexacons/Guild Wars 2/gw2.ini",
+		"/E/CodeFiles/Scripts/pw.bat",
+		"/E/CodeFiles/Scripts/mcb.bat",
+		"/E/CodeFiles/DashExtension/manifest.json",
+		"/E/CodeFiles/DashExtension/index.html",
+		"/E/CodeFiles/DashExtension/js/moment.min.js",
+		"/E/CodeFiles/Scripts/mcb.pyw",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/Simplic/Weather/Weather.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/Simplic/Time/Time 12 h.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/Hexacons/Civ V/icon.ini",
+		"/E/CodeFiles/DashExtension/css",
+		"/E/CodeFiles/Calendar/js/adminCal.js",
+		"/E/CodeFiles/Calendar/js/cal.js",
+		"/E/CodeFiles/MIMEParser/9146584/sampleParser.php",
+		"/E/CodeFiles/MIMEParser/9146584/attachment.class.php",
+		"/E/CodeFiles/MIMEParser/9146584/MimeMailParser.class.php",
+		"/E/Downloads/client_secret_356319519864-0ar5t1u4o396t6v9mdstoi156c85igne.apps.googleusercontent.com.json",
+		"/C/Users/Kyle/AppData/Local/Google/Chrome/User Data/Default/Extensions/koganddneebdmpiifbkdneaoladjeblk/1.0_0/manifest.json",
+		"/E/Downloads/client_secret_356319519864-0ar5t1u4o396t6v9mdstoi156c85igne.apps.googleusercontent.com (1).json",
+		"/C/Users/Kyle/AppData/Local/Google/Chrome/User Data/Default/Sync Extension Settings/moilgoddjjagpebghgflcnnnjfjojfkj/MANIFEST-000001",
+		"/C/Users/Kyle/AppData/Local/Google/Chrome/User Data/Default/Extensions/mlomiejdfkolichcflejclcbmpeaniij/5.4.11_0/manifest.json",
+		"/C/Program Files (x86)/Google/Chrome/Application/50.0.2661.102/default_apps/external_extensions.json",
+		"/C/Program Files (x86)/Google/Chrome/Application/50.0.2661.94/Extensions/external_extensions.json",
+		"/C/Program Files (x86)/Google/Chrome/Application/50.0.2661.102/Extensions/external_extensions.json",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/Hexacons/Diablo 3/icon.ini",
+		"/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/CircuitousTwo/Config.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/Spotify Control Skin/Spotify Control Skin.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/Simplic/Hdd (D)/Disk D.ini",
+		"/C/Users/Kyle/AppData/Roaming/Rainmeter/Rainmeter.ini",
+		"/C/Users/Kyle/AppData/Roaming/Rainmeter/Layouts/First Try/Rainmeter.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/MujiTaskNote/MujiTaskNote.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/email/email.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/CircuitousTwo/Weather/yweather.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/CircuitousTwo/NowPlaying/media.ini",
+		"/C/Users/Kyle/Documents/Rainmeter/Skins/illustro/Network/Network.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive/csgo/cfg/config.cfg"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 92.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"eventArray",
+			"eventDropped",
+			"getEventList",
+			"eventDropped",
+			",::",
+			"eventDr",
+			"\n                    ",
+			"$(",
+			"\n                ",
+			"        ",
+			"$(",
+			"if"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "js/cal.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 21369,
+						"regions":
+						{
+							"bookmark_a":
+							{
+								"flags": 144,
+								"regions":
+								[
+									[
+										17346,
+										17346
+									]
+								]
+							}
+						},
+						"selection":
+						[
+							[
+								20103,
+								20103
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"auto_complete": false,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"rulers":
+							[
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 8238.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/JSHint Gutter/JSHint.sublime-settings",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 814,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								492,
+								492
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"auto_complete": true,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/HTML-CSS-JS Prettify/HTMLPrettify.sublime-settings",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 614,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								270,
+								216
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 19979,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								19979,
+								19979
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"auto_complete": false,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
+							],
+							"default_dir": "E:\\CodeFiles\\Calendar",
+							"default_extension": "js",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "css/calendarStyleSheet.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1895,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1892,
+								1892
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content"
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 810.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 5,
+					"file": "manifest.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 667,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/C/Users/Kyle/AppData/Roaming/Sublime Text 3/Packages/JSHint Gutter/.jshintrc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 815,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								737,
+								737
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "cal.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11494,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11494,
+								11494
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"auto_complete": false,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"rulers":
+							[
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 915.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "css/fullcalendar.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 25553,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3,
+								3
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
+							],
+							"side_bar_folders_auto_load_folder": 1,
+							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 36.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 102.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "calProject.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 126.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
