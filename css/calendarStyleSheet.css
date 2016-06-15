@@ -3,6 +3,7 @@ html {
 }
 body {
     height: 100%;
+    width: 100%
     margin-top: 40px;
     text-align: center;
     font-size: 14px;
@@ -36,8 +37,10 @@ label{
 
 #external-events-wrapper {
     float: left;
-    width: 200px;
-    padding: 20px 10px;
+    /*width: 200px;
+    padding: 20px 10px;*/
+    width: 10%;
+    padding: 20px;
     border: 1px solid #ccc;
     background: #EEEEEE;
     text-align: left;
@@ -97,7 +100,7 @@ fieldset {
 
 input.text {
     margin-bottom: 12px;
-    width: 95%;
+    width: 90%;
     padding: .4em;
 }
 
@@ -119,14 +122,15 @@ label, input {
 
 #trashCan {
     float: left;
-    width: 150px;
+    width: 5px;
     vertical-align: middle;
     padding: inherit;
 }
 
 #calendar {
     float: left;
-    width: 900px;
+    width: 80%;
+    margin: 20px;
 }
 
 .ck {

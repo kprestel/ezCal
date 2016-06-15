@@ -3,16 +3,22 @@ $(document).ready(function() {
     // getUserGCal();
     //loadEvents();
     //initAutoComplete();
-    intDroppables();
+    // window.eventArray = [];
+    initDroppables();
     loadEvents();
     displayCalendar();
 });
 var numOfEvents;
+// window.eventArray = [];
 // var access_token;
 var eventArray = [];
 var eventTypeArray = [];
 var maxEventID;
 var placeSearch, autoComplete, place;
+
+// function initEventArray(global){
+
+// }
 
 function displayCalendar() {
     $('#calendar').fullCalendar({
@@ -44,7 +50,7 @@ function displayCalendar() {
             event.placeID = item.eventPlaceID;
             event.topic = item.eventTopic;
             event.allDay = item.eventAllDay;
-            console.log(events);
+            console.log(event);
             return event;
         }),
         eventRender: function(event, element) {
@@ -67,6 +73,7 @@ function displayCalendar() {
                     textAlign: 'left',
                     tip: true
                 }
+
             });
             // TODO: update this
             switch (event.topic) {
@@ -147,9 +154,9 @@ function displayCalendar() {
 }
 
 function loadEvents() {
-    try{
+    try {
         eventArray = JSON.parse(localStorage.getItem('eventArray'));
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
@@ -163,9 +170,9 @@ function saveEventTypes() {
 }
 
 function loadEventTypes() {
-    try{
+    try {
         eventTypeArray = JSON.parse(localStorage.getItem('eventTypeArray'));
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
@@ -190,8 +197,8 @@ function updateEvent(event) {
     saveEvents();
     console.log(eventToSave);
 }
-// adds drag/drop functionality the events
-function intDroppables() {
+// adds drag/drop functionality to the external events
+function initDroppables() {
     $('#external-events .fc-event').each(function() {
         $(this).data('event', {
             topic: $(this).text(),
@@ -247,17 +254,24 @@ function setEventColor(picker) {
     return value;
 }
 
-// TODO: Remove events from the array 
-// deletes event from the DB when it is dropped in the trashcan
+// deletes event from users gcal
+// when it is dropped in the trashcan
 function deleteEvent(event) {
-    for (var i = 0; i < eventArray.length; i++) {
-        if (eventArray[i].eventID == event.id) {
-            eventArray.splice(i, 1);
-            break;
+    var request = gapi.client.calendar.events.delete({
+        'calendarId': getCalIdPrefence(),
+        'eventId': event.id
+    });
+
+    request.execute(function(response){
+        if(!response){
+            console.log('event delete threw error');
+            console.log(response);
+        } else {
+            console.log('event deleted');
         }
-    }
+    });
+
     $('#calendar').fullCalendar('removeEvents', event.id);
-    saveEvents();
 }
 // called when an existing event's date/time is changed by being dropped on the calendar
 function eventDropped(date, externalEvent) {
@@ -292,6 +306,7 @@ function eventDropped(date, externalEvent) {
     event_object.title = $('#txtExternalEventTitle').val();
     copiedEventObject = $.extend({}, event_object);
     copiedEventObject.start = startDate.hour(startHour).minute(startMin);
+    //copiedEventObject.id = 1;
     copiedEventObject.id = getNewID();
     copiedEventObject.end = date.hour(endHour).minute(endMin);
     if (document.getElementById("ckAllDay").checked) {
@@ -322,7 +337,7 @@ function showEventClickedPopUp(event) {
         buttons: {
             "Update Event": function() {
                 // copy values from the clicked event to the new event
-                var copiedEvent = new Object();
+                var copiedEvent = {};
                 var e = document.getElementById("ddlEventTopic");
                 topic = e.options[e.selectedIndex].value;
                 copiedEvent.topic = topic;
@@ -448,25 +463,6 @@ function addEventFromDialog() {
     $('#calendar').fullCalendar('renderEvent', event, true);
 }
 
-// function updateEventSource(data) { // delete?
-//     var events = [];
-//     $.map(data.d, function(item, i) {
-//         console.log(item);
-//         var eventEndDate = {};
-//         var event = {};
-//         event.id = item.eventID,
-//             event.start = new Date(item.eventStartDate),
-//             event.end = new Date(item.eventEndDate),
-//             event.title = item.eventTitle,
-//             event.description = item.eventDescription,
-//             event.topic = item.eventTopic,
-//             event.allDay = false;
-//         events.push(event);
-//         console.log(event);
-//     });
-//     $('#calendar').fullCalendar('addEventSource', events);
-// }
-
 function initAutoComplete() {
     autoComplete = new google.maps.places.Autocomplete((document.getElementById('txtLocation')), {
         types: ['geocode']
@@ -529,68 +525,126 @@ function handleAuthResult(authResult) {
     }
 }
 
+
 function loadCalApi() {
-    gapi.client.load('calendar', 'v3').then(function(){
-    var request = gapi.client.calendar.events.list({
-        'calendarId': 'primary'
-    });
-    console.log(request);
-
-    request.execute(function(response){
-        console.log(response);
-        var events = response.items;
-        if(events.length > 0){
-            for(var i=0; i < events.length; i++){
-                var event = events[i];
-                var when = event.start.dateTime;
-                if(!when){
-                    when = event.start.date;
+    var view = $("#calendar").fullCalendar('getView');
+    //var gEventArray = [];
+    var gEventArray = [];
+    // if (!eventArray) {
+    //     eventArray = [];
+    // }
+    //var startDate = view.start.toISOString();
+    // window.eventArray = [];
+    console.log(view.start.local().toISOString());
+    gapi.client.load('calendar', 'v3').then(function() {
+        var request = gapi.client.calendar.events.list({
+            'calendarId': 'primary',
+           'showDeleted': false,
+            //'timeMin': view.start.toISOString()
+        });
+        console.log(request);
+        // get events from google
+        request.execute(function(response) {
+            console.log(response);
+            var events = response.items;
+            if (events.length > 0) {
+                for (var i = 0; i < events.length; i++) {
+                    var eventGoogle = events[i];
+                    var event = {};
+                    event.start = moment(eventGoogle.start.dateTime);
+                    if (!eventGoogle.start.dateTime) {
+                        console.log('start test');
+                        event.start = moment(eventGoogle.start.date);
+                        event.allDay = true;
+                    }
+                    event.end = moment(eventGoogle.end.dateTime);
+                    if (!eventGoogle.end.dateTime) {
+                        event.end = moment(eventGoogle.end.date);
+                    }
+                    event.title = eventGoogle.summary;
+                    event.id = eventGoogle.id;
+                    event.description = eventGoogle.description;
+                    event.placeID = eventGoogle.location;
+                    gEventArray.push(event);
+                    console.log(event);
+                    if (i == events.length - 1) {
+                        $("#calendar").fullCalendar('addEventSource', gEventArray);
+                    }
                 }
-                console.log(event);
+            } else {
+                console.log('no events');
             }
-        } else {
-            console.log('no events');
-        }
-    });
-
-
+        });
 
     });
-    console.log('test');
+    // get events from google
+    // request.execute(function(response) {
+    //     console.log(response);
+    //     var events = response.items;
+    //     if (events.length > 0) {
+    //         for (var i = 0; i < events.length; i++) {
+    //             var event = events[i];
+    //             var copiedEvent = {};
+    //             copiedEvent.eventStartDate = moment(event.start.dateTime);
+    //             if (!event.start.dateTime) {
+    //                 console.log('start test');
+    //                 copiedEvent.eventStartDate = moment(event.start.date);
+    //                 copiedEvent.eventAllDay = true;
+    //             }
+    //             copiedEvent.eventEndDate = moment(event.end.dateTime);
+    //             if (!event.end.dateTime) {
+    //                 copiedEvent.eventEndDate = moment(event.end.date);
+    //             }
+    //             copiedEvent.eventTitle = event.summary;
+    //             copiedEvent.eventID = event.id;
+    //             copiedEvent.eventDescription = event.description;
+    //             copiedEvent.eventPlaceID = event.location;
+
+    //             gEventArray.push(copiedEvent);
+    //             console.log(event.start);
+
+    //             console.log(copiedEvent);
+    //         }
+    //         if (i == events.length) {
+    //             console.log('hi');
+    //             var jsonArray = JSON.stringify(gEventArray);
+    //             console.log(jsonArray);
+    //             $("#calendar").fullCalendar('addEventSource', jsonArray);
+    //             $("#calendar").fullCalendar('rerenderEvents');
+    //         }
+    //     } else {
+    //         console.log('no events');
+    //     }
+    // });
+
+//});
+//initDroppables();
+//displayCalendar();
+//console.log('test');
+// var view = $('#calendar').fullCalendar('getView');
+// alert("The view's title is " + view.start.toISOString());
+// var jsonArray = JSON.stringify(gEventArray);
+// $("#calendar").fullCalendar('addEventSource', jsonArray);
+//console.log(jsonArray);
+//eventArray.push.apply(eventArray, gEventArray);
+//$("#calendar").fullCalendar('refetchEvents');
+
+// $("#calendar").fullCalendar({
+//     events: $.map(gEventArray, function(item, i) {
+//         var event = {};
+//         event.id = item.eventID;
+//         event.start = moment(item.eventStartDate);
+//         event.end = moment(item.eventEndDate);
+//         event.title = item.eventTitle;
+//         event.description = item.eventDescription;
+//         event.placeID = item.eventPlaceID;
+//         event.topic = item.eventTopic;
+//         event.allDay = item.eventAllDay;
+//         return event;
+//     })
+// });
 }
 
-// function getUserGCal() {
-//     var apiKey = 'AIzaSyBH1B0PDg5Ck7EXnix7u9nDpFAZcGejoVE';
-//     var access_token;
-//     gapi.client.setApiKey(apiKey);
-//     chrome.identity.getAuthToken({
-//         'interactive': true
-//     }, function(token) {
-//         if (chrome.runtime.lastError) {
-//             console.log(chrome.runtime.lastError);
-//         } else {
-//             gapi.auth.setToken(token);
-//             access_token = token;
-//             $.get("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" + access_token)
-//             .done(function(data){
-//                 console.log(data);
-//             });
-//             console.log(token);
-//             //requestStart();
-//             //console.log(token);
-//             //gapi.client.setApiKey(apiKey);
-//             loadCalApi(access_token);
-//         }
-//     });
-//     // var clientID = '356319519864-0ar5t1u4o396t6v9mdstoi156c85igne.apps.googleusercontent.com';
-//     // var scopes = "https://www.googleapis.com/auth/calendar";
-//     // gapi.client.setApiKey(apiKey);
-//     //checkAuth(clientID, scopes);
-// }
-
-// function requestStart() {
-//     var xhr = new XMLHttpRequest();
-//     xhr.open('POST', 'https://accounts.google.com/o/oauth2/v2/auth');
-//     xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
-//     xhr.send();
-// }
+function getCalIdPrefence(){
+    return 'primary';
+}
