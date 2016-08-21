@@ -44,7 +44,6 @@ function displayCalendar() {
             event.placeID = item.eventPlaceID;
             event.topic = item.eventTopic;
             event.allDay = item.eventAllDay;
-            console.log(events);
             return event;
         }),
         eventRender: function(event, element) {

@@ -1,0 +1,8 @@
+{
+"libs": [
+"jQuery"
+],
+"loadEagerly": [
+"moment.js"
+]
+}

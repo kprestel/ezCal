@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>ezCal Options</title>
+	<style>
+	body: { padding: 10px; }
+	</style>
+</head>
+<body>
+	Time format:
+	<select name="ddlTimeFormat">
+		<option selected="selected" value="ampm">AM PM</option>
+		<option value="24hr">24 HR</option>
+		<option value="french">French</option>
+	</select>
+	Enable Google event reminders:
+	<select name="ddlReminders">
+		<option value="y">Yes</option>
+		<option selected="selected" value="n">No</option>
+	</select>
+	Load multiple calendars:
+	<select name="ddlMultiCal">
+		<option value="y">Yes</option>
+		<option selected="selected" value="n">No</option>
+	</select>
+	Default length of event (hours):
+	<select name="ddlDefaultLength">
+		<option selected="selected" value="1">1 Hour</option>
+		<option value="2">2 Hour</option>
+		<option value="3">3 Hour</option>
+		<option value="4">4 Hour</option>
+		<option value="5">5 Hour</option>
+		<option value="6">6 Hour</option>
+	</select>
+	Display past events?:
+	<select name="ddlPastEvents">
+		<option value="y">Yes</option>
+		<option selected="selected" value="n">No</option>}
+	</select>
+	Background Color:
+	<button id="bgColor" class="jscolor {valueElement: 'chosen-value', onFineChange: 'setBgColor(this)', styleElement: 'bgColor'}">Select Background Color</button>
+
+	Text Color: 
+	<button id="txtColor" class="jscolor {valueElement: 'chosen-value', onFineChange: 'setTxtColor(this)', styleElement: 'txtColor'}">Select Text Color</button>
+
+	<button id="btnSave">Save Options</button>
+	
+	<script src="js/jquery-2.2.3.js" type="text/javascript"></script>
+	<script src="js/jscolor.js" type="text/javascript"></script>
+	<script src="js/options.js" type="text/javascript"></script>
+
+</body>
+</html>

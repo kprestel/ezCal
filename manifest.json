@@ -7,6 +7,10 @@
   "chrome_url_overrides": {
       "newtab": "cal.html"
   },
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
   "content_security_policy":"script-src 'self' 'unsafe-eval' https://apis.google.com https://maps.googleapis.com; object-src 'self'",
   "oauth2": {
     "client_id": "356319519864-gcgrmgndh4t8t77mss6i7o1laa2g67vd.apps.googleusercontent.com",
@@ -14,6 +18,7 @@
       "https://www.googleapis.com/auth/calendar"
     ]
   },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnN9KUuv8tOv6rHa7UOqTPldDOD7KDmtZ0uT9FAZvJNZchhx2d/ZWwI1rjH9X7WJUq3z9NS0/HV4e1z8dKZm69qDPBj0YJvK10i4zUIWYhzyVngQDNrfdKW/vHmAN7qlNg6JgASLe/53Z+yorPvk1BaVP3IQd8mpPEgoOnCiejmnvtjBMxbqFn2BkKyc29tJwOcXP+DHyuQwUw3e2a96M2javvvxKGHCZVIObihQz9kIYZZY1H3szWj0JjDrKnr7DPO2/0BN+YM+UBjhv4YPVZz9Pl/MV0tQnDrMHnI7O40inl3u+ihCkFnPec5zwUPo17S0nu6/mrkelJJbnf2yqIQIDAQAB",
 
   "permissions": [
       "tabs",
