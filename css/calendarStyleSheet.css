@@ -121,16 +121,17 @@ label, input {
     }
 
 #trashCan {
-    float: left;
-    width: 5px;
+    /* float: left; */
+    float: right;
+    width: 100px;
     vertical-align: middle;
     padding: inherit;
 }
 
 #calendar {
     float: left;
-    width: 80%;
-    margin: 20px;
+    width: 75%;
+    margin: 10px;
 }
 
 .ck {
