@@ -582,7 +582,7 @@ function handleClientLoad() {
     checkAuth(clientID, scopes);
 }
 
-// need fixing
+// use oauth2 to authorize user requests
 function checkAuth(clientID, scopes) {
     gapi.auth.authorize({
         'client_id': clientID,
