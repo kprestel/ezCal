@@ -1,10 +1,10 @@
 html {
-    height: 100%;
+    /* height: 100%; */
 }
 body {
-    height: 100%;
-    width: 100%
-    margin-top: 40px;
+    /* height: 80%; */
+    /* width: 95%; */
+    /* margin-top: 40px; */
     text-align: center;
     font-size: 14px;
     font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
@@ -13,7 +13,9 @@ body {
 }
 
 #wrap {
-    width: 1500px;
+    /* width: 1500px; */
+    /* width: 100%; */
+    /* height: 100%; */
     margin-left: auto;
     margin-right: auto;
 }
@@ -54,10 +56,11 @@ label{
 
 #external-events .fc-event {
     margin: 10px 0;
+    text-align: center;
     cursor: pointer;
 }
 
-#B-Boy .B-Boy, .fc-event {
+#work .work, .fc-event {
     background-color: purple;
 }
 
@@ -82,8 +85,8 @@ label{
 }
 
 #external-event-text {
-    float: left;
-    width: 75px;
+    /* float: left; */
+    width: 25%;
 }
 
 #external-event-text {
@@ -92,10 +95,37 @@ label{
     width: inherit;
 }
 
+#eventTypePopUpForm > button{
+    align: center;
+    display: inline-block;
+}
+
+
 fieldset {
     padding: 0;
     border: 0;
-    margin-top: 25px;
+    margin: 25px;
+    display: inline-block;
+    vertical-align: baseline;
+    width 200px;
+}
+
+.form-group label{
+   text-align: left;
+   padding: 5px;
+}
+
+.form-group{
+    display: inline-block;
+    vertical-align: baseline;
+    width 200px;
+}
+
+form, input{
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+
 }
 
 input.text {
@@ -105,7 +135,7 @@ input.text {
 }
 
 label, input {
-    display: block;
+    display: inline-block;
     text-align: left;
 }
 
@@ -131,6 +161,7 @@ label, input {
 #calendar {
     float: left;
     width: 75%;
+    height: 90%;
     margin: 10px;
 }
 

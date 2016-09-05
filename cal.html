@@ -17,11 +17,11 @@
         <div id="external-events-wrapper">
             <div id="external-events">
                 <h3>Create Events</h3>
-                <div id="MC" class="fc-event MC">Work</div>
-                <div id="B-Boy" class="fc-event B-Boy">School</div>
-                <div id="DJ" class="fc-event DJ">Family</div>
-                <div id="Graffiti" class="fc-event Graffiti">Social</div>
-                <div id="CommunityService" class="fc-event Community-Service">Doctor</div>
+                <!-- <div id="school" class="fc-event MC">Work</div> -->
+                <!-- <div id="work" class="fc-event work">Wor</div> -->
+                <!-- <div id="DJ" class="fc-event DJ">Family</div> -->
+                <!-- <div id="Graffiti" class="fc-event Graffiti">Social</div> -->
+                <!-- <div id="CommunityService" class="fc-event Community-Service">Doctor</div> -->
                 <div id="General" class="fc-event General">General</div>
             </div>
             <div class="external-event-text">
@@ -51,27 +51,41 @@
     <div id="ajaxEvent" name="ajaxEvent" style="display:none"></div>
     <div id="eventForm" style="display:none">
         <form id="eventPopUpForm">
-            <fieldset>
+            <fieldset class="input-feildset">
+                <div class="form-group">
                 <label for="txtEventTitle">Event Title:</label>
                 <input type="text" id="txtEventTitle" class="text-center ui-widget-content ui-corner-all" />
+                </div>
                 <!-- <label for="txtEventStartDate">Event Start Date:</label>
                 <input type="text" id="txtEventStartDate" class="text-center ui-widget-content ui-corner-all" />
                 <label for="txtEventEndDate">Event End Date:</label>
                 <input type="text" id="txtEventEndDate" class="text-center ui-widget-content ui-corner-all" /> -->
+                <div class="form-group">
                 <label for="txtEventDate">Event Date:</label>
                 <input type="text" id="txtEventDate" class="text-center ui-widget-content ui-corner-all" />
+                </div>
+                <div class="form-group">
                 <label for="txtEventStartTime">Start Time:</label>
                 <input type="text" id="txtEventStartTime" class="text-center ui-widget-content ui-corner-all" />
+                </div>
+                <div class="form-group">
                 <label for="txtEventEndTime">End Time:</label>
                 <input type="text" id="txtEventEndTime" class="text-center ui-widget-content ui-corner-all" />
+                </div>
+                <div class="form-group">
                 <label for="txtEventDescription">Event Description:</label>
                 <input type="text" id="txtEventDescription" class="text-center ui-widget-content ui-corner-all" />
+                </div>
+                <div class="form-group">
                 <label for="txtEventLocation">Event Location:</label>
                 <input type="text" id="txtEventLocation" class="text-center ui-widget-content ui-corner-all" />
+                </div>
+                <div class="form-group">
                 <label for="ddlEventCategory">Event Category:</label>
                 <!-- ddlEventCategory populated via JS -->
                 <select id="ddlEventCategory" class="ui-selectmenu">
                 </select>
+                </div>
                 <input type="submit" id="btnAddEvent" tabindex="-1" style="position:absolute; top:-10000px" />
             </fieldset>
         </form>

@@ -1,13 +1,13 @@
 "use strict";
 $(document).ready(function() {
-    initExternalEventTimeAutoComplete();
-    loadEventTypes();
-    createExternalEventsOnLoaD();
-    getTimeFormatPrefence();
-    initDroppables();
-    loadEvents();
-    // loadUserSettings();
-    displayCalendar();
+initExternalEventTimeAutoComplete();
+loadEventTypes();
+createExternalEventsOnLoaD();
+getTimeFormatPrefence();
+initDroppables();
+loadEvents();
+// loadUserSettings();
+displayCalendar();
 });
 var eventArray = [];
 var eventTypeArray = [];
@@ -17,7 +17,7 @@ var value;
 var placeSearch, autoComplete, place;
 
 function displayCalendar() {
-    $('#calendar').fullCalendar({
+$('#calendar').fullCalendar({
         header: {
             left: 'prev,next today',
             center: 'title',
@@ -58,7 +58,11 @@ function displayCalendar() {
                     tip: true
                 }
             });
-            injectEventCategoryCSS(event, element);
+            // TODO: refactor to remove element from this call
+            var bg = injectEventCategoryCSS(event, element);
+            // console.log(element);
+            element.css('background-color', bg);
+            // console.log(element);
         },
         eventAfterRender: function(event, element, view) {
             if ($(this).data("qtip")) $(this).qtip('destroy');
@@ -88,6 +92,12 @@ function displayCalendar() {
         drop: function(date) { // called when a external event is dropped
             eventDropped(date, this);
             if ($(this).data("qtip")) $(this).qtip('destroy');
+        },
+        // doesn't do anything?
+        eventReceive(event){
+            var bg = injectEventCategoryCSS(event);
+            console.log(event);
+            console.log(bg);
         },
         eventClick: function(event) {
             showEventClickedPopUp(event);
@@ -134,6 +144,12 @@ function saveEventTypes() {
 function loadEventTypes() {
     if (localStorage.eventTypeArray) {
         eventTypeArray = JSON.parse(localStorage.eventTypeArray);
+    } else{
+        var generalEvent = {};
+        generalEvent.category = 'General';
+        generalEvent.color = 'dodgerblue';
+        eventTypeArray[0] = generalEvent;
+        saveEventTypes();
     }
 }
 
@@ -163,10 +179,10 @@ function updateEvent(event) {
             'location': location,
             'description': desc,
             'start': {
-                'date': event.start.format("yyyy-mm-dd")
+                'date': event.start.format("YYYY-MM-DD")
             },
             'end': {
-                'date': event.end.format("yyyy-mm-dd")
+                'date': event.end.format("YYYY-MM-DD")
             }
         };
 
@@ -222,10 +238,14 @@ function initDroppables() {
         $(this).draggable({
             zIndex: 999,
             revert: "invalid",
-            //help: "clone",
+            // help: "clone",
             drop: function() {
                 $("#calendar").fullCalendar('unselect');
             },
+            // destroy: function(){
+            //     $(this).remove();
+            // },
+
             revertDuration: 0
         });
     });
@@ -238,8 +258,8 @@ function initDroppables() {
 function createNewEventType() {
     $("#eventTypeForm").dialog({
         autoOpen: false,
-        height: 200,
-        width: 200,
+        height: 250,
+        width: 250,
         title: 'Create New Event Type',
         modal: true,
         buttons: {
@@ -283,16 +303,27 @@ function createExternalEventsOnLoaD() {
 // styles each event on the calendar according to their category 
 function injectEventCategoryCSS(event, element) {
     var category;
+    if(!event.category){
     for (var i = 0; i < eventArray.length; i++) {
         if (eventArray[i].id == event.id) {
             category = eventArray[i].category;
             break;
         }
     }
+    }else{
+        category = event.category;
+    }
+    // for (var i = 0; i < eventArray.length; i++) {
+    //     if (eventArray[i].id == event.id) {
+    //         category = eventArray[i].category;
+    //         break;
+    //     }
+    // }
     if (category) {
         for (var i = 0; i < eventTypeArray.length; i++) {
             if (eventTypeArray[i].category == category) {
-                element.css("background-color", eventTypeArray[i].color);
+                // element.css("background-color", eventTypeArray[i].color);
+                return eventTypeArray[i].color;
                 break;
             }
         }
@@ -331,9 +362,7 @@ function deleteEvent(event) {
 function eventDropped(date, externalEvent) {
     var event_object;
     var copiedEventObject;
-
     console.log($("#txtStartTime").data('timeAutocomplete').getTime());
-
     // get desired date and time for the event 
     var startTime = $("#txtStartTime").data('timeAutocomplete').getTime();
     var i = startTime.indexOf(":");
@@ -360,7 +389,7 @@ function eventDropped(date, externalEvent) {
     var endDate = moment().year(endYear).month(endMonth).date(endDay).hour(endHour).minute(endMin);
 
     if (startDate > endDate) {
-        alert('Invaild Date');
+     alert('Invaild Date');
     } else {
         event_object = $(externalEvent).data('event');
         if ($("#txtEventDescription").val() > 0) {
@@ -393,6 +422,7 @@ function eventDropped(date, externalEvent) {
         copiedEventObject.start = copiedEventObject.start.local();
         copiedEventObject.end = copiedEventObject.end.local();
         // update this method to properly render events plz
+        // externalEvent.remove();
         $('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
         place = "";
     }
@@ -403,7 +433,7 @@ function showEventClickedPopUp(event) {
     $("#eventForm").dialog({
         autoOpen: false,
         height: 400,
-        width: 270,
+        width: 375,
         title: 'Update Event',
         modal: true,
         buttons: {
@@ -440,6 +470,7 @@ function showEventClickedPopUp(event) {
         e.preventDefault();
         updateEvent(event);
     });
+    populateCategoryDropDown();
     $('#ddlEventTopic').val(event.topic);
     autoComplete = new google.maps.places.Autocomplete((document.getElementById('txtEventLocation')), {
         types: ['geocode']
@@ -469,13 +500,13 @@ function showEventClickedPopUp(event) {
 function showPopUp(start, end) {
     $("#eventForm").dialog({
         autoOpen: false,
-        height: 400,
-        width: 250,
+        height: 375,
+        width: 400,
         title: "Add New Event",
         modal: true,
         buttons: {
             "Add Event": function() {
-                addEventFromDialog();
+                addEventFromDialog(start);
                 clearTextBoxes();
             },
             Cancel: function() {
@@ -500,6 +531,7 @@ function showPopUp(start, end) {
         increment: 5,
         auto_value: true
     });
+    $("#eventForm #txtEventDate").val(start.format('MM-DD-YYYY'));
     $("#eventForm #txtEventEndTime").timeAutocomplete({
         formatter: getTimeFormatPrefence(),
         increment: 5,
@@ -522,18 +554,55 @@ function clearTextBoxes() {
 }
 // TODO: add events to event array from dialog
 // called when a time is clicked for the user to add an event.
-function addEventFromDialog() {
+function addEventFromDialog(start) {
     var eventToSave = {};
     var event = {};
     var category;
     var e = document.getElementById("ddlEventCategory");
     category = e.options[e.selectedIndex].value;
-    eventToSave.eventTitle = event.title = $('#txtEventTitle').val();
     // TODO: validate dates being passed in or create a different input
-    eventToSave.eventStartDate = event.start = moment(new Date($("#eventForm #txtEventStartDate").val()));
-    eventToSave.eventEndDate = event.end = moment(new Date($("#eventForm #txtEventEndDate").val()));
+    var startTime = $("#eventForm #txtEventStartTime").data('timeAutocomplete').getTime();
+    var i = startTime.indexOf(":");
+    var startHour = startTime.substring(0, i);
+    startHour = parseInt(startHour, 10);
+    var startMin = startTime.substring(i + 1, i + 3);
+    startMin = parseInt(startMin, 10); // may cause display issues 
+
+    var endTime = $("#eventForm #txtEventEndTime").data('timeAutocomplete').getTime();
+    var x = endTime.indexOf(":");
+    var endHour = endTime.substring(0, x);
+    endHour = parseInt(endHour, 10);
+    var endMin = endTime.substring(x + 1, x + 3);
+    endMin = parseInt(endMin, 10); // may cause display issues
+
+    // var tempDate = moment($("#eventForm #txtEventDate").val());
+    var tempDate = start;
+    var tempMoment = moment(tempDate);
+    var startYear = tempMoment.year();
+    var startMonth = tempMoment.month();
+    var startDay = tempMoment.date();
+    var startDate =
+        moment().year(startYear).month(startMonth).date(startDay).hour(startHour).minute(startMin);
+    var endYear = tempMoment.year();
+    var endMonth = tempMoment.month();
+    var endDay = tempMoment.date();
+    var endDate =
+        moment().year(endYear).month(endMonth).date(endDay).hour(endHour).minute(endMin);
+
+    // eventToSave.eventStartDate = event.start = moment(new Date($("#eventForm #txtEventStartTime").val()));
+    // eventToSave.eventEndDate = event.end = moment(new Date($("#eventForm #txtEventEndTime").val()));
+    if(startDate > endDate){
+        alert("Invalid Date");
+        return null;
+    }
+    eventToSave.eventTitle = event.title = $('#txtEventTitle').val();
+    eventToSave.eventStartDate = event.start = startDate;
+    eventToSave.eventEndDate = event.end = endDate;
     eventToSave.eventDescription = event.description = $('#txtEventDescription').val();
     eventToSave.eventTopic = event.category = category;
+    console.log(eventToSave);
+    console.log(event);
+    updateEvent(event);
     $('#calendar').fullCalendar('refetchEvents');
     $('#calendar').fullCalendar('renderEvent', event, true);
 }
