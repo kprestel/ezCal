@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "version": "2.0.1",
+  "version": "2.0.2",
   "version_name": "alpha",
   "name": "EZ Cal",
   "description": "Drag and Drop Calendar for gCal",
@@ -9,7 +9,8 @@
   },
   "options_ui": {
     "page": "options.html",
-    "chrome_style": true
+    "chrome_style": true,
+    "open_in_tab": true
   },
   "content_security_policy":"script-src 'self' 'unsafe-eval' https://apis.google.com https://maps.googleapis.com; object-src 'self'",
   "oauth2": {

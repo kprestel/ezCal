@@ -3,11 +3,17 @@ $(document).ready(function() {
 	$("#btnSave").click(function() {
 		saveOptions();
 	});
-	$("#ddlTimeFormat").selectmenu("enable");
-	$("#ddlReminders").selectmenu("enable");
-	$("#ddlMultiCal").selectmenu("enable");
-	$("#ddlDefaultLength").selectmenu("enable");
-	$("#ddlPastEvents").selectmenu("enable");
+	$("#ddlTimeFormat").selectmenu();
+	// $("#ddlTimeFormat").selectmenu("enable");
+	$("#ddlReminders").selectmenu();
+	// $("#ddlReminders").selectmenu("enable");
+	// $("#ddlMultiCal").selectmenu("enable");
+	$("#ddlMultiCal").selectmenu();
+	// $("#ddlDefaultLength").selectmenu("enable");
+	$("#ddlDefaultLength").selectmenu();
+	// $("#ddlPastEvents").selectmenu("enable");
+	$("#ddlPastEvents").selectmenu();
+	console.log('asdfasdfasdfasd');
 	loadOptions();
 });
 
@@ -17,8 +23,9 @@ var txtValue;
 
 function saveOptions() {
 	var settings = {};
+	var tf = $("#ddlTimeFormat");
 	var tf = document.getElementById("ddlTimeFormat");
-	settings.timeFormat = tf.options[e.selectedIndex].value;
+	settings.timeFormat = tf.options[tf.selectedIndex].value;
 	var r = document.getElementById("ddlReminders");
 	settings.reminders = r.options[r.selectedIndex].value;
 	var mc = document.getElementById("ddlMultiCal");
@@ -29,13 +36,22 @@ function saveOptions() {
 	settings.pastEvents = pe.options[pe.selectedIndex].value;
 	settings.bgColor = bgValue;
 	settings.txtColor = txtValue;
+	console.log(settings);
 	storeOptions(settings);
 }
 
 function storeOptions(settings) {
-	localStorage.setItem('userSettings', JSON.stringify(settings));
-}
-
+	// localStorage.setItem('userSettings', JSON.stringify(settings));
+	var userSettings = JSON.stringify(settings);
+	console.log(userSettings);
+	var key = "settings";
+	var jsonSettings = {};
+	jsonSettings[key] = userSettings;
+	console.log(jsonSettings);
+	chrome.storage.sync.set(jsonSettings, function(){
+		console.log('settings', key, userSettings);
+	});
+} 
 function loadOptions() {
 	if (localStorage.userSettings) {
 		var userSettings = JSON.parse(localStorage.userSettings);

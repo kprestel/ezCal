@@ -6,26 +6,28 @@
 	<style>
 	body: { padding: 10px; }
 	</style>
+	<link rel="stylesheet" href="css/jquery-ui.css">
+	<link rel="stylesheet" href="css/jquery-ui.theme.css">
 </head>
 <body>
 	Time format:
-	<select name="ddlTimeFormat">
+	<select id="ddlTimeFormat" name="ddlTimeFormat">
 		<option selected="selected" value="ampm">AM PM</option>
 		<option value="24hr">24 HR</option>
 		<option value="french">French</option>
 	</select>
 	Enable Google event reminders:
-	<select name="ddlReminders">
+	<select id="ddlReminders">
 		<option value="y">Yes</option>
 		<option selected="selected" value="n">No</option>
 	</select>
 	Load multiple calendars:
-	<select name="ddlMultiCal">
-		<option value="y">Yes</option>
-		<option selected="selected" value="n">No</option>
+	<select id="ddlMultiCal">
+		<option selected="selected" value="y">Yes</option>
+		<option value="n">No</option>
 	</select>
 	Default length of event (hours):
-	<select name="ddlDefaultLength">
+	<select id="ddlDefaultLength">
 		<option selected="selected" value="1">1 Hour</option>
 		<option value="2">2 Hour</option>
 		<option value="3">3 Hour</option>
@@ -34,9 +36,9 @@
 		<option value="6">6 Hour</option>
 	</select>
 	Display past events?:
-	<select name="ddlPastEvents">
+	<select id="ddlPastEvents">
 		<option value="y">Yes</option>
-		<option selected="selected" value="n">No</option>}
+		<option selected="selected" value="n">No</option>
 	</select>
 	Background Color:
 	<button id="bgColor" class="jscolor {valueElement: 'chosen-value', onFineChange: 'setBgColor(this)', styleElement: 'bgColor'}">Select Background Color</button>
@@ -47,6 +49,7 @@
 	<button id="btnSave">Save Options</button>
 	
 	<script src="js/jquery-2.2.3.js" type="text/javascript"></script>
+	<script src="js/jquery-ui.js" type="text/javascript"></script>
 	<script src="js/jscolor.js" type="text/javascript"></script>
 	<script src="js/options.js" type="text/javascript"></script>
 

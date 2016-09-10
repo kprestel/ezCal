@@ -1,23 +1,29 @@
 "use strict";
 $(document).ready(function() {
-initExternalEventTimeAutoComplete();
-loadEventTypes();
-createExternalEventsOnLoaD();
-getTimeFormatPrefence();
-initDroppables();
-loadEvents();
-// loadUserSettings();
-displayCalendar();
+    makeScreenFit();
+    initExternalEventTimeAutoComplete();
+    loadEventTypes();
+    setTimeFormatPrefence();
+    initDroppables();
+    loadEvents();
+    loadUserSettings();
+    // userSettings = loadUserSettings();
+    // createExternalEventsOnLoaD();
+    displayCalendar();
 });
 var eventArray = [];
 var eventTypeArray = [];
-//var userSettings = {};
+// var userSettings = [];
+// console.log(userSettings);
+// var userSettings = loadUserSettings();
+// console.log(userSettings);
+// console.log(userSettings.txtColor);
 // var gEventArray = [];
 var value;
 var placeSearch, autoComplete, place;
 
 function displayCalendar() {
-$('#calendar').fullCalendar({
+    $('#calendar').fullCalendar({
         header: {
             left: 'prev,next today',
             center: 'title',
@@ -29,12 +35,14 @@ $('#calendar').fullCalendar({
             showPopUp(start, end);
         },
         editable: true,
+        height: ($(window).height() - 20),
         droppable: true,
         unselectAuto: true,
         draggable: true,
-        default: getDefaultEventLength(),
+        default: setDefaultEventLength(),
         lazyFetching: false,
         forceEventDuration: true,
+        // eventTextColor: loadUserSettings().txtColor,
         eventTextColor: 'White',
         // attach qtip UI element 
         eventRender: function(event, element) {
@@ -125,9 +133,16 @@ $('#calendar').fullCalendar({
 }
 
 function loadEvents() {
-    if (localStorage.eventArray) {
-        eventArray = JSON.parse(localStorage.eventArray);
-    }
+    chrome.storage.sync.get("eventArray", function(events){
+        if(!$.isEmptyObject(events)){
+            var localEventArray = JSON.parse(events.eventArray);
+            console.log('loaded events', localEventArray);
+            eventArray = localEventArray;
+        }
+    });
+    // if (localStorage.eventArray) {
+    //     eventArray = JSON.parse(localStorage.eventArray);
+    // }
     // if (localStorage.gEventArray) {
     //         gEventArray = localStorage.gEventArray;
     // }
@@ -135,27 +150,74 @@ function loadEvents() {
 
 function saveLocalEvents() {
     localStorage.setItem('eventArray', JSON.stringify(eventArray));
+    var localEvents = JSON.stringify(eventArray);
+    var key = "eventArray";
+    var jsonEventArray = {}
+    jsonEventArray[key] = localEvents;
+    chrome.storage.sync.set(jsonEventArray, function(){
+        console.log('event types', key, localEvents);
+    });
 }
 
 function saveEventTypes() {
-    localStorage.setItem('eventTypeArray', JSON.stringify(eventTypeArray));
+    // localStorage.setItem('eventTypeArray', JSON.stringify(eventTypeArray));
+    // this saves the event type array using chrome sync 
+    // it makes a weird json object that can later be accessed 
+    var typeArray = JSON.stringify(eventTypeArray);
+    var key = "eventTypeArray";
+    var jsonTypeArray = {};
+    jsonTypeArray[key] = typeArray;
+    chrome.storage.sync.set(jsonTypeArray, function(){
+        console.log('event types', key, typeArray);
+    });
 }
 
 function loadEventTypes() {
-    if (localStorage.eventTypeArray) {
-        eventTypeArray = JSON.parse(localStorage.eventTypeArray);
-    } else{
-        var generalEvent = {};
-        generalEvent.category = 'General';
-        generalEvent.color = 'dodgerblue';
-        eventTypeArray[0] = generalEvent;
-        saveEventTypes();
-    }
+    chrome.storage.sync.get("eventTypeArray", function(types){
+        if($.isEmptyObject(types)){
+            var generalEvent = {};
+            generalEvent.category = 'General';
+            generalEvent.color = 'dodgerblue';
+            eventTypeArray[0] = generalEvent;
+            saveEventTypes();
+        } else {
+            var typeArray = JSON.parse(types.eventTypeArray);
+            console.log('loaded types', typeArray);
+            eventTypeArray = typeArray;
+            createExternalEventsOnLoaD();
+        }
+    });
 }
 
 function loadUserSettings(){
-    if (localStorage.userSettings) {
-        userSettings = JSON.parse(localStorage.userSettings);
+    chrome.storage.sync.get("settings", function(settings){
+        if($.isEmptyObject(settings)){
+            openOptionsPage();
+        } else {
+            var loadedSettings = JSON.parse(settings.settings);
+            console.log(loadedSettings);
+            console.log(loadedSettings);
+            setTimeFormatPrefence(loadedSettings.timeFormat);
+            setDefaultEventLength(loadedSettings.defaultLength);
+            setPastEventPref(loadedSettings.pastEvents);
+            setBgColor(loadedSettings.bgColor);
+            return loadedSettings;
+        }
+    });
+}
+
+function getColor(settings){
+    // var settings = loadUserSettings();
+    console.log(settings);
+    console.log(settings.txtColor);
+    return settings.txtColor;
+}
+
+function openOptionsPage(){
+    if(chrome.runtime.openOptionsPage()){
+        chrome.runtime.openOptionsPage();
+    } else {
+        window.open(chrome.runtime.getURL('options.html'));
     }
 }
 
@@ -293,6 +355,7 @@ function createExternalEventFromDialog(eventConfig) {
 
 function createExternalEventsOnLoaD() {
     for (var i = 0; i < eventTypeArray.length; i++) {
+        console.log('eventype', eventTypeArray[i]);
         var eventConfig = eventTypeArray[i];
         $("head").append('<style type="text/css"> .' + eventConfig.category + '{background-color:' + eventConfig.color + '; </style>');
         $("#external-events").append(
@@ -304,12 +367,12 @@ function createExternalEventsOnLoaD() {
 function injectEventCategoryCSS(event, element) {
     var category;
     if(!event.category){
-    for (var i = 0; i < eventArray.length; i++) {
-        if (eventArray[i].id == event.id) {
-            category = eventArray[i].category;
-            break;
+        for (var i = 0; i < eventArray.length; i++) {
+            if (eventArray[i].id == event.id) {
+                category = eventArray[i].category;
+                break;
+            }
         }
-    }
     }else{
         category = event.category;
     }
@@ -389,7 +452,7 @@ function eventDropped(date, externalEvent) {
     var endDate = moment().year(endYear).month(endMonth).date(endDay).hour(endHour).minute(endMin);
 
     if (startDate > endDate) {
-     alert('Invaild Date');
+        alert('Invaild Date');
     } else {
         event_object = $(externalEvent).data('event');
         if ($("#txtEventDescription").val() > 0) {
@@ -480,13 +543,13 @@ function showEventClickedPopUp(event) {
     $("#eventForm #txtEventTitle").val(event.title);
     $("#eventForm #txtEventDate").val(event.start.format("MM-DD-YYYY"));
     $("#eventForm #txtEventStart").timeAutocomplete({
-        formatter: getTimeFormatPrefence(),
-        increment: 5,
+        formatter: setTimeFormatPrefence(),
+        increment: 15,
         value: event.start.format('HH:mm:ss')
     });
     $("#eventForm #txtEventEndTime").timeAutocomplete({
-        formatter: getTimeFormatPrefence(),
-        increment: 5,
+        formatter: setTimeFormatPrefence(),
+        increment: 15,
         from_selector: '#eventForm #txtEventStartTime',
         value: event.end.format('HH:mm:ss')
     });
@@ -500,7 +563,7 @@ function showEventClickedPopUp(event) {
 function showPopUp(start, end) {
     $("#eventForm").dialog({
         autoOpen: false,
-        height: 375,
+        height: 400,
         width: 400,
         title: "Add New Event",
         modal: true,
@@ -527,22 +590,22 @@ function showPopUp(start, end) {
         addEventFromDialog();
     });
     $("#eventForm #txtEventStartTime").timeAutocomplete({
-        formatter: getTimeFormatPrefence(),
+        formatter: setTimeFormatPrefence(),
         increment: 5,
         auto_value: true
     });
     $("#eventForm #txtEventDate").val(start.format('MM-DD-YYYY'));
     $("#eventForm #txtEventEndTime").timeAutocomplete({
-        formatter: getTimeFormatPrefence(),
+        formatter: setTimeFormatPrefence(),
         increment: 5,
         from_selector: '#txtEventStartTime',
         //auto_value: true
     });
-    // $("#eventForm #txtEventStartDate").val(start.format('MM-DD-YYYY h:mm'));
-    // $("#eventForm #txtEventEndDate").val(start.add(1, 'h').format('MM-DD-YYYY h:mm'));
     $("#eventForm").dialog('open');
     populateCategoryDropDown();
-    $('#ddlEventCategory').selectmenu();
+    $('#ddlEventCategory').selectmenu({
+        width: 154
+    });
 }
 // resets the textboxes
 function clearTextBoxes() {
@@ -589,8 +652,6 @@ function addEventFromDialog(start) {
     var endDate =
         moment().year(endYear).month(endMonth).date(endDay).hour(endHour).minute(endMin);
 
-    // eventToSave.eventStartDate = event.start = moment(new Date($("#eventForm #txtEventStartTime").val()));
-    // eventToSave.eventEndDate = event.end = moment(new Date($("#eventForm #txtEventEndTime").val()));
     if(startDate > endDate){
         alert("Invalid Date");
         return null;
@@ -662,8 +723,20 @@ function checkAuth(clientID, scopes) {
 
 function handleAuthResult(authResult) {
     // var authorizeDiv
+    var multiCal;
+    chrome.storage.sync.get("settings", function(settings){
+        if(!$.isEmptyObject(settings)){
+            var settings = JSON.parse(settings.settings);
+            multiCal = settings.multiCal;
+        }
+    });
     if (authResult && !authResult.error) {
-        loadCalApi();
+        if(multiCal == 'n')
+        {
+            loadCalApi();
+        } else {
+            loadMultipleCals();
+        }
     } else {
         console.log(authResult);
     }
@@ -739,14 +812,21 @@ function loadMultipleCals() {
             });
             console.log(request);
             request.execute(function(response) {
+                console.log(response);
                 gCalArray = response.items;
+                console.log(gCalArray);
+                for (var j = 0; j < gCalArray.length; j++) {
+                    console.log(gCalArray[j].id)
+                    getEvents(gCalArray[j].id);
+                }
             });
             // get events from google
-            if (gCalArray.length > 0) {
-                for (var j = 0; j < gCalArray.length; j++) {
-                    getEvents(gCalArray[j]);
-                }
-            }
+            // if (gCalArray.length > 0) {
+            //     for (var j = 0; j < gCalArray.length; j++) {
+            //         console.log(gCalArray[j].id)
+            //         getEvents(gCalArray[j].id);
+            //     }
+            // }
         });
     } catch (e) {
         console.log(e);
@@ -757,8 +837,11 @@ function getEvents(calId) {
     var gEventArray = [];
     var request = gapi.client.calendar.events.list({
         'calendarId': calId.toString(),
-        'showDeleted': false
+        'showDeleted': false,
+        'timeMin': moment().subtract(1, 'months').utc().toISOString(),
+        'maxResults': 2500
     });
+    console.log(request);
     request.execute(function(response) {
         console.log(response);
         var events = response.items;
@@ -780,13 +863,13 @@ function getEvents(calId) {
                 event.description = eventGoogle.description;
                 event.placeID = eventGoogle.location;
                 gEventArray.push(event);
-                //console.log(event);
+                console.log(event);
                 if (i == events.length - 1) {
                     $("#calendar").fullCalendar('addEventSource', gEventArray);
                 }
             }
         } else {
-            console.log('no events');
+            console.log('no events for calendar', calId);
         }
     });
 
@@ -799,18 +882,58 @@ function populateCategoryDropDown() {
 
 }
 
+function makeScreenFit(){
+    var h = $(window).height();
+    console.log(h);
+    $("#calendar").fullCalendar('option', 'height',h);
+    // $("#body").css('height', window.innerHeight);
+    // $("#wrap").height($(document).height());
+    // $("#wrap").css('height', window.innerHeight);
+    // $("#calendar").css('max-height', '1000px');
+    // $("#body").css('min-height', window.innerHeight);
+    // $("#body").css('max-height', window.innerHeight);
+    // $("#wrap").css('min-height', window.innerHeight);
+    // $("#wrap").css('max-height', window.innerHeight);
+    // $("#body").css('min-width', screen.width);
+    // $("#body").css('max-width', screen.width);
+    // $("#wrap").css('min-width', screen.width);
+    // $("#wrap").css('max-width', screen.width);
+}
+
 // adds timeAutoComplete to the external event 
 // time text boxes
 function initExternalEventTimeAutoComplete() {
     $("#txtStartTime").timeAutocomplete({
-        formatter: getTimeFormatPrefence(),
-        increment: 5,
+        formatter: setTimeFormatPrefence(),
+        increment: 15,
+        end_hour: 24,
         // value: event.start.format('HH:mm:ss')
     });
     $("#txtEndTime").timeAutocomplete({
-        formatter: getTimeFormatPrefence(),
-        increment: 5,
+        formatter: setTimeFormatPrefence(),
+        increment: 15,
         from_selector: '#txtStartTime',
+        end_hour: 24,
+        // value: event.end.format('HH:mm:ss')
+
+    });
+
+}
+
+// adds timeAutoComplete to the external event 
+// time text boxes
+function initExternalEventTimeAutoComplete() {
+    $("#txtStartTime").timeAutocomplete({
+        formatter: setTimeFormatPrefence(),
+        increment: 15,
+        end_hour: 24,
+        // value: event.start.format('HH:mm:ss')
+    });
+    $("#txtEndTime").timeAutocomplete({
+        formatter: setTimeFormatPrefence(),
+        increment: 15,
+        from_selector: '#txtStartTime',
+        end_hour: 24,
         // value: event.end.format('HH:mm:ss')
 
     });
@@ -822,21 +945,11 @@ function getCalIdPrefence() {
     return 'primary';
 }
 
-function getDefaultEventLength() {
-    if (localStorage.userSettings) {
-        var userSettings = JSON.parse(localStorage.userSettings);
-        return userSettings.defaultLength;
-    } else {
-        return 1;
-    }
+function setDefaultEventLength(pref) {
+    return pref;
 }
 
-function getTimeFormatPrefence() {
-    var pref;
-    if (localStorage.userSettings) {
-        var userSettings = JSON.parse(localStorage.userSettings);
-        pref = userSettings.timeFormat;
-    }
+function setTimeFormatPrefence(pref) {
     switch (pref) {
         case "ampm":
             $("#head").append('<script src="js/ampm.js></script>');
@@ -857,14 +970,22 @@ function getTimeFormatPrefence() {
 
 }
 
-function getPastEventPref(){
-    if (localStorage.userSettings) {
-        var userSettings = JSON.parse(localStorage.userSettings);
-        if(userSettings.pastEvents == 'n'){
-            return moment().utc();
-        } else {
-            return false;
-        }
-        
+function setReminderPref(pref){
+    if(perf == 'n'){
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function setBgColor(pref){
+    $(document.body).css('background', pref);
+}
+
+function setPastEventPref(pref){
+    if(pref == 'n'){
+        return moment().subtract(1,'months').utc();
+    } else {
+        return false;
     }
 }
